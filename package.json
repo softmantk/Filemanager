@@ -2,7 +2,7 @@
   "name": "filemanager",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,5 +19,12 @@
   "bugs": {
     "url": "https://github.com/softmantk/Filemanager/issues"
   },
-  "homepage": "https://github.com/softmantk/Filemanager#readme"
+  "homepage": "https://github.com/softmantk/Filemanager#readme",
+  "dependencies": {
+    "archiver": "^1.3.0",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "morgan": "^1.8.2",
+    "multer": "^1.3.0"
+  }
 }
