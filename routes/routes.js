@@ -4,13 +4,15 @@
 module.exports = function (express, app) {
     var path = require("path"),
         fs = require("fs"),
-        dir = "E:/BACKUP",
+        // the default drive
+        dir = process.env.dirpath || "./";
         router = express.Router(),
         archiver = require('archiver'),
-        multer = require('multer')();
+        formidable = require('formidable'),
+        // util = require('util'),
+        dirpop = dir ;
 
     router.get('/', function (req, res, next) {
-        console.log("call /");
         res.sendFile('files.html', {root: path.join(__dirname, "..", "views")});
     });
     router.get("/files/*", function (req, res, next) {
@@ -20,6 +22,7 @@ module.exports = function (express, app) {
         var dirpath = path.join(dir, dirarr.slice(2).join("/"));
         var stat = fs.lstatSync(dirpath);
         var isDir = fs.lstatSync(dirpath).isDirectory();
+        dirpop = dirpath;
         if (isDir) {
             //    Its a directory
             fs.readdir(dirpath, function (err, files) {
@@ -59,6 +62,7 @@ module.exports = function (express, app) {
     });
 
     router.get("/files", function (req, res, next) {
+
         fs.readdir(dir, function (err, files) {
             var fileObj,
                 filesArr = [];
@@ -86,7 +90,8 @@ module.exports = function (express, app) {
         })
     });
 
-    router.get('/archive', function (req, res) {
+    router.get('/archive/*', function (req, res) {
+        console.log("I am called");
         var decodedURI = decodeURI(req.url);
         var dirarr = decodedURI.split('/');
         var dirpath = path.join(dir, dirarr.slice(2).join("/"));
@@ -111,21 +116,21 @@ module.exports = function (express, app) {
 
     });
 
-    router.post('/upload', multer.single('upData'), function (req, res) {
-        var decodedURI = decodeURI(req.url);
-        var dirarr = decodedURI.split('/');
-        var dirpath = path.join(dir, dirarr.slice(2).join("/"));
-        console.log(dirpath);
-        console.log(req.file)
-        fs.writeFile("jj.jpg", req.file, function (err) {
-            if (err) throw err
-            console.log('The file has been saved!');
+    router.post('/upload', function (req, res) {
 
-        })
+        console.log("dirpop: "+dirpop)
+        var form = new formidable.IncomingForm();
+        form.uploadDir = dirpop;
+        form.keepExtensions = true;
+        form.parse(req, function(err, fields, files) {
+            res.redirect('/');
+        });
+        form.on('file', function(field, file) {
+            //rename the incoming file to the file's name
+            fs.rename(file.path, form.uploadDir + "/" + file.name);
+        });
     });
-
     app.use('/', router);
-
 };
 
 
